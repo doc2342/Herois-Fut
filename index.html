@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Heróis Fut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: estádio noturno. Gramado à esquerda com a escalação, painel tático à direita; empilha no celular. */
+:root{
+  --ink:#0e1124; --panel:#171b39; --panel-2:#21264c; --line:#2f3668;
+  --fg:#eef0ff; --muted:#a0a6d2;
+  --pitch:#1d5c45; --pitch-2:#195239; --chalk:rgba(255,255,255,.18); --chalk-2:rgba(255,255,255,.42);
+  --hero:#f4b63f; --hero-soft:rgba(244,182,63,.16);
+  --villain:#ec4a6e; --anti:#63d3c5;
+  --grn:#46d17d; --yel:#f1cd47; --red:#f05454; --nem:#bf8fff;
+  --shadow:rgba(0,0,0,.4);
+  --f-display:'Bangers','Impact','Arial Black',system-ui,sans-serif;
+  --f-cond:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --f-body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ink);color:var(--fg)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--anti);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:400}
+p{margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:14px 48px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:4px 14px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.logo{font-family:var(--f-display);font-size:30px;letter-spacing:.06em;line-height:1;color:var(--hero);text-shadow:2px 2px 0 var(--villain)}
+.logo span{color:var(--fg)}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:0;padding:0;font-family:var(--f-cond);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.steps li{list-style:none;padding:3px 10px;border-radius:999px;color:var(--muted);border:1px solid var(--line)}
+.steps li.done{color:var(--fg)}
+.steps li.on{color:var(--ink);background:var(--hero);border-color:var(--hero)}
+
+.lbl{font-family:var(--f-cond);font-weight:600;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.h2{font-family:var(--f-display);font-size:30px;letter-spacing:.04em;line-height:1}
+.muted{color:var(--muted)}
+.btn{font-family:var(--f-cond);font-weight:700;font-size:16px;letter-spacing:.07em;text-transform:uppercase;padding:10px 18px;border-radius:8px;border:2px solid var(--hero);background:var(--hero);color:var(--ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:24px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+/* Intro */
+.intro{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:32px;align-items:center}
+@media (max-width:860px){.intro{grid-template-columns:minmax(0,1fr)}}
+.intro h1{font-family:var(--f-display);font-size:clamp(48px,9vw,88px);line-height:.9;letter-spacing:.03em;color:var(--hero);text-shadow:4px 4px 0 var(--villain)}
+.intro h1 span{display:block;color:var(--fg);text-shadow:4px 4px 0 var(--line)}
+.lead{font-size:18px;max-width:52ch;margin-top:14px}
+.rules{display:grid;gap:12px;margin:22px 0;padding:0;list-style:none;counter-reset:r}
+.rules li{counter-increment:r;display:grid;grid-template-columns:34px 1fr;gap:10px;max-width:60ch}
+.rules li::before{content:counter(r);font-family:var(--f-display);font-size:26px;color:var(--hero);line-height:1}
+.rules b{font-family:var(--f-cond);font-size:17px;letter-spacing:.04em;text-transform:uppercase}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:18px;height:4px;border-radius:2px}
+.k-grn{background:var(--grn)} .k-yel{background:var(--yel)} .k-red{background:var(--red)} .k-conf{background:repeating-linear-gradient(90deg,var(--red) 0 4px,transparent 4px 7px)} .k-nem{background:var(--nem)}
+.caption{font-size:13px;color:var(--muted);text-align:center;margin-top:8px}
+
+/* Gramado */
+.pitch{position:relative;max-width:500px;width:100%;margin:0 auto;border-radius:14px;border:2px solid var(--chalk);overflow:hidden;
+  background:repeating-linear-gradient(180deg,var(--pitch) 0 44px,var(--pitch-2) 44px 88px)}
+.midline{height:0;border-top:2px solid var(--chalk-2);position:relative}
+.midline::after{content:"";position:absolute;left:50%;top:-30px;width:60px;height:60px;transform:translateX(-50%);border:2px solid var(--chalk-2);border-radius:50%}
+.board{position:relative;width:100%;aspect-ratio:10/9}
+.lanesep{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed var(--chalk)}
+.lanebg{position:absolute;top:0;bottom:0;transition:background .2s}
+.lanebg.hi-atk{background:rgba(236,74,110,.22)}
+.lanebg.hi-def{background:rgba(99,211,197,.2)}
+.lanelbl{position:absolute;bottom:4px;font-family:var(--f-cond);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--chalk-2);transform:translateX(-50%)}
+.board.flip .lanelbl{bottom:auto;top:4px}
+.board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.board line{stroke-width:3.5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.lk-grn{stroke:var(--grn)} .lk-yel{stroke:var(--yel)} .lk-red{stroke:var(--red)} .lk-nem{stroke:var(--nem)}
+.lk-conf{stroke:var(--red);stroke-dasharray:4 4}
+.lk-off{stroke:var(--chalk);stroke-dasharray:2 5;stroke-width:2!important}
+.slot{position:absolute;width:20%;transform:translate(-50%,-50%);padding:0;border:0;background:none;cursor:pointer;z-index:2;text-align:left}
+.slot.static{cursor:default}
+.empty{min-height:72px;border:2px dashed var(--chalk-2);border-radius:8px;display:grid;place-items:center;font-family:var(--f-cond);font-weight:600;font-size:13px;letter-spacing:.1em;color:var(--chalk-2);background:rgba(0,0,0,.12)}
+.empty.target{border-color:var(--hero);color:var(--hero)}
+
+/* Carta pequena */
+.al-H{--al:var(--hero)} .al-V{--al:var(--villain)} .al-A{--al:var(--anti)}
+.mc{position:relative;display:flex;flex-direction:column;gap:2px;min-height:72px;padding:4px 5px 5px;border-radius:8px;border:2px solid var(--al);
+  background:linear-gradient(165deg,var(--panel-2),var(--ink));font-family:var(--f-cond);box-shadow:0 3px 0 var(--shadow)}
+.mc-top{display:flex;align-items:baseline;gap:4px}
+.mc-top b{font-size:18px;line-height:1;color:var(--al);font-variant-numeric:tabular-nums}
+.mc-top span{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.05em}
+.mc-top i{margin-left:auto;font-style:normal;color:var(--oc);font-size:14px;line-height:1}
+.mc-name{font-size:12.5px;font-weight:600;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.2em;overflow-wrap:anywhere}
+.mc-st{font-size:11px;color:var(--yel);letter-spacing:1px;line-height:1}
+.mc.sel{outline:3px solid var(--fg);outline-offset:2px}
+.badge{position:absolute;top:-8px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-cond);font-weight:700;font-size:11px;line-height:1}
+.badge.cap{right:-6px;background:var(--hero);color:var(--ink)}
+.badge.oop{left:-6px;background:var(--red);color:var(--ink)}
+.strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.strip button{padding:0;border:0;background:none;cursor:pointer;text-align:left}
+.strip .ph{min-height:72px;border:1px dashed var(--line);border-radius:8px}
+
+/* Carta grande */
+.bc{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:2px solid var(--al);height:100%;
+  background:linear-gradient(170deg,var(--panel-2) 0%,var(--panel) 55%,var(--ink) 100%);box-shadow:0 4px 0 var(--shadow);transition:transform .15s}
+.bc-head{display:flex;align-items:center;gap:10px}
+.bc-ovr{font-family:var(--f-cond);font-weight:700;font-size:36px;line-height:.85;color:var(--al);font-variant-numeric:tabular-nums}
+.bc-pos{font-family:var(--f-cond);font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.06em;line-height:1.1}
+.bc-em{margin-left:auto;width:48px;height:48px;flex:none;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:21px;letter-spacing:.04em;
+  background:radial-gradient(circle at 35% 30%,var(--oc),transparent 75%),var(--panel);border:2px solid var(--oc);color:var(--fg);text-shadow:1px 1px 0 var(--ink)}
+.bc-name{font-family:var(--f-display);font-size:25px;letter-spacing:.04em;line-height:1}
+.bc-al{font-family:var(--f-cond);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--al)}
+.stat{display:grid;grid-template-columns:30px 1fr 18px;align-items:center;gap:6px;font-family:var(--f-cond);font-size:13px;font-weight:600}
+.stat em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--al)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);background:var(--ink);white-space:nowrap}
+.chip.o{border-color:var(--oc)}
+.nemline{font-size:12.5px;color:var(--nem)}
+.hint{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:7px;margin-top:auto;display:flex;flex-direction:column;gap:2px}
+.hint .g{color:var(--grn)} .hint .r{color:var(--red)} .hint .n{color:var(--nem)}
+.pickbtn{display:block;width:100%;padding:0;border:0;background:none;cursor:pointer;text-align:left}
+.pickbtn:hover:not(:disabled) .bc{transform:translateY(-4px)}
+.pickbtn:disabled{cursor:wait;opacity:.55}
+.offer{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.offer{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.bc{padding:10px}.bc-name{font-size:21px}}
+.draftbar{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.turn{font-family:var(--f-cond);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:999px;background:var(--hero);color:var(--ink)}
+.turn.cpu{background:var(--villain)}
+.teams{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:22px}
+@media (max-width:700px){.teams{grid-template-columns:minmax(0,1fr)}}
+.poscount{font-family:var(--f-cond);font-size:14px;color:var(--muted)}
+
+/* Escalação */
+.seg{display:flex;gap:6px}
+.seg button{flex:1 1 0;min-width:0;padding:8px 6px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer;font-family:var(--f-cond);font-weight:600;font-size:15px;line-height:1.15}
+.seg button small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.seg button.on{border-color:var(--hero);background:var(--hero-soft)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.meter{display:flex;align-items:baseline;gap:8px}
+.meter b{font-family:var(--f-display);font-size:38px;line-height:1;color:var(--yel);letter-spacing:.03em}
+.meterbar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.meterbar i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--yel),var(--grn))}
+.links{display:flex;flex-direction:column;gap:4px;font-size:13.5px;margin:0;padding:0;list-style:none}
+.links li{display:flex;gap:8px;align-items:center}
+.links i{flex:none;width:16px;height:4px;border-radius:2px}
+.benchhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;max-width:500px;margin:16px auto 8px}
+.bench{max-width:500px;margin:0 auto}
+
+/* Partida */
+.score{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:16px;flex-wrap:wrap}
+.score .t{font-family:var(--f-cond);font-weight:700;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.score .n{font-family:var(--f-display);font-size:52px;line-height:1;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.score .x{font-family:var(--f-display);font-size:30px;color:var(--muted)}
+.lances{display:flex;gap:5px;justify-content:center;width:100%}
+.lances i{width:22px;height:5px;border-radius:3px;background:var(--line)}
+.lances i.done{background:var(--muted)} .lances i.now{background:var(--hero)}
+.lanebtn{text-align:left}
+.lanebtn .v{font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);font-weight:500}
+.lanebtn .v b{color:var(--fg)}
+.res{display:flex;flex-direction:column;gap:8px}
+.shot{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--ink);font-size:14px}
+.shot.gol{border-color:var(--grn)}
+.shot.sofreu{border-color:var(--red)}
+.shot .head{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-cond);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.shot .big{font-family:var(--f-display);font-size:24px;letter-spacing:.04em;line-height:1.1;margin:4px 0 2px}
+.shot.gol .big{color:var(--grn)} .shot.sofreu .big{color:var(--red)}
+.calc{font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.die{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;background:var(--fg);color:var(--ink);font-family:var(--f-cond);font-weight:700;font-size:13px}
+.log{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13.5px;max-height:220px;overflow:auto}
+.log li{padding-left:10px;border-left:3px solid var(--line)}
+.log li.me{border-color:var(--grn)} .log li.cpu{border-color:var(--red)} .log li.sub{border-color:var(--anti)}
+.final{font-family:var(--f-display);font-size:40px;letter-spacing:.04em;line-height:1}
+.final.win{color:var(--grn)} .final.lose{color:var(--red)} .final.draw{color:var(--yel)}
+@media (prefers-reduced-motion:no-preference){
+  .pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes pop{from{transform:scale(.6);opacity:.2}to{transform:scale(1);opacity:1}}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+/* ---------- Dados ---------- */
+const FAC = {VAN:'Vanguarda Aurora', CAI:'Guardiões do Cais', ECL:'Sindicato Eclipse', MAR:'Maré Negra', ERR:'Errantes'};
+const ORI = {
+  TEC:{n:'Tecnologia', g:'⚙︎', c:'#5fb6ff'},
+  MIS:{n:'Místico',    g:'✶',       c:'#c792ff'},
+  MUT:{n:'Mutante',    g:'☣︎', c:'#8be36a'},
+  COS:{n:'Cósmico',    g:'✦',       c:'#ffb35c'},
+};
+const CID = {NEO:'Neópolis', ABI:'Porto Abismo', FER:'Vila Ferrugem', CEL:'Alto Celeste'};
+const AL = {H:'Herói', V:'Vilão', A:'Anti-herói'};
+const POSN = {ATA:'Atacante', TAT:'Tático', DEF:'Defensor'};
+const LANES = ['Esquerda','Centro','Direita'];
+const FOCO = 4, BASE = 3, TOTAL_LANCES = 5;
+
+// id, nome, alinhamento, facção, origem, cidade, posição, ATQ, DEF, capitão
+const RAW = [
+  ['aurora','Capitã Aurora','H','VAN','COS','NEO','TAT',8,8,1],
+  ['faisca','Faísca','H','VAN','MUT','NEO','ATA',8,4],
+  ['prisma','Doutora Prisma','H','VAN','TEC','CEL','TAT',6,7],
+  ['muralha','Muralha','H','VAN','MUT','FER','DEF',3,9],
+  ['cometa','Cometa','H','VAN','COS','CEL','ATA',9,3],
+  ['lince','Lince','H','VAN','TEC','NEO','ATA',7,5],
+  ['ambar','Escudo Âmbar','H','VAN','MIS','NEO','DEF',4,8],
+  ['oraculo','Oráculo','H','VAN','MIS','CEL','TAT',5,7],
+  ['pulsar','Pulsar','H','VAN','COS','FER','DEF',4,8],
+  ['coral','Almirante Coral','H','CAI','MUT','ABI','DEF',6,9,1],
+  ['arpao','Arpão','H','CAI','TEC','ABI','ATA',8,4],
+  ['sereia','Sereia de Aço','H','CAI','TEC','ABI','TAT',6,6],
+  ['farol','Farol','H','CAI','MIS','ABI','DEF',3,8],
+  ['marealta','Maré Alta','H','CAI','MUT','FER','ATA',7,5],
+  ['bruma','Bruma','H','CAI','MIS','CEL','TAT',6,6],
+  ['ancora','Âncora','H','CAI','COS','ABI','DEF',4,8],
+  ['gaivota','Gaivota','H','CAI','MUT','NEO','ATA',7,3],
+  ['eclipse','Rei Eclipse','V','ECL','COS','NEO','ATA',9,6,1],
+  ['curto','Curto-Circuito','V','ECL','TEC','FER','ATA',8,3],
+  ['britadeira','Britadeira','V','ECL','MUT','FER','DEF',5,9],
+  ['cifra','Madame Cifra','V','ECL','TEC','NEO','TAT',6,7],
+  ['sombra','Sombra Neon','V','ECL','MIS','NEO','ATA',7,4],
+  ['engrenagem','Engrenagem','V','ECL','TEC','FER','TAT',5,7],
+  ['buraco','Buraco Negro','V','ECL','COS','CEL','DEF',4,8],
+  ['ferrugem','Ferrugem','V','ECL','MUT','FER','DEF',3,8],
+  ['kraken','Kraken Rubro','V','MAR','MUT','ABI','TAT',8,7,1],
+  ['feiticeira','Feiticeira Abissal','V','MAR','MIS','ABI','ATA',8,4],
+  ['naufragio','Naufrágio','V','MAR','MIS','ABI','DEF',4,8],
+  ['tubarao','Tubarão Branco','V','MAR','MUT','ABI','ATA',8,5],
+  ['nevoa','Névoa Pálida','V','MAR','MIS','CEL','TAT',6,6],
+  ['corsario','Corsário Zero','V','MAR','TEC','ABI','TAT',6,5],
+  ['lodo','Lodo','V','MAR','MUT','FER','DEF',3,9],
+  ['vortice','Vórtice','V','MAR','COS','CEL','ATA',7,4],
+  ['andarilho','O Andarilho','A','ERR','COS','FER','TAT',7,7,1],
+  ['viuva','Viúva Cinza','A','ERR','TEC','NEO','ATA',8,5],
+  ['lamina','Lâmina Rubra','A','ERR','MUT','ABI','ATA',8,4],
+  ['corvo','Corvo','A','ERR','MIS','FER','TAT',6,6],
+  ['sentenca','Sentença','A','ERR','TEC','CEL','DEF',5,8],
+  ['eco','Eco','A','ERR','COS','CEL','TAT',6,5],
+];
+const NEM = [['aurora','eclipse'],['faisca','curto'],['muralha','britadeira'],['prisma','cifra'],['lince','sombra'],['cometa','buraco'],
+  ['coral','kraken'],['arpao','tubarao'],['bruma','feiticeira'],['farol','naufragio'],['sereia','corsario'],['ancora','lodo'],
+  ['pulsar','vortice'],['oraculo','nevoa'],['viuva','engrenagem'],['corvo','ferrugem']];
+
+const C = {};
+RAW.forEach(([id,nome,al,fac,ori,cid,pos,atq,def,cap]) => { C[id] = {id,nome,al,fac,ori,cid,pos,atq,def,cap:!!cap,nem:null}; });
+NEM.forEach(([a,b]) => { C[a].nem = b; C[b].nem = a; });
+Object.values(C).forEach(c => {
+  const prim = c.pos==='ATA' ? c.atq : c.pos==='DEF' ? c.def : (c.atq+c.def)/2;
+  const sec  = c.pos==='ATA' ? c.def : c.pos==='DEF' ? c.atq : (c.atq+c.def)/2;
+  c.ovr = Math.min(99, Math.round(45 + prim*4.5 + sec*1.2));
+});
+
+/* Formações: [linha, coluna 0..4]. Ligações: mesma linha e vizinhas, ou linhas vizinhas com |dx| <= 1. */
+const FORMS = {
+  '2-3-2': {nome:'Equilíbrio', slots:[['ATA',1],['ATA',3],['TAT',0],['TAT',2],['TAT',4],['DEF',1],['DEF',3]]},
+  '3-2-2': {nome:'Blitz',      slots:[['ATA',0],['ATA',2],['ATA',4],['TAT',1],['TAT',3],['DEF',1],['DEF',3]]},
+  '2-2-3': {nome:'Muralha',    slots:[['ATA',1],['ATA',3],['TAT',1],['TAT',3],['DEF',0],['DEF',2],['DEF',4]]},
+};
+const ROWN = {ATA:0, TAT:1, DEF:2};
+const ROWT = {ATA:18, TAT:50, DEF:82};
+const LINKS = {};
+for (const f in FORMS) {
+  const s = FORMS[f].slots, L = [];
+  for (let i=0;i<s.length;i++) for (let j=i+1;j<s.length;j++) {
+    const [ri,xi] = s[i], [rj,xj] = s[j];
+    if (ri===rj) {
+      const between = s.some(([r,x]) => r===ri && x>Math.min(xi,xj) && x<Math.max(xi,xj));
+      if (!between) L.push([i,j]);
+    } else if (Math.abs(ROWN[ri]-ROWN[rj])===1 && Math.abs(xi-xj)<=1) L.push([i,j]);
+  }
+  LINKS[f] = L;
+}
+const laneOf = x => x<2 ? 0 : x===2 ? 1 : 2;
+const slotLeft = x => 11 + x*19.5;
+
+/* ---------- Regras ---------- */
+function linkInfo(a,b){
+  if (a.nem===b.id) return {v:3, t:'nem', why:['rivalidade']};
+  if ((a.al==='H'&&b.al==='V')||(a.al==='V'&&b.al==='H')) return {v:-1, t:'conf', why:['herói × vilão']};
+  const why = [];
+  if (a.fac===b.fac) why.push('facção');
+  if (a.ori===b.ori) why.push('origem');
+  if (a.cid===b.cid) why.push('cidade');
+  const v = Math.min(why.length,2);
+  return {v, t:['red','yel','grn'][v], why};
+}
+function calcTeam(t){
+  const F = FORMS[t.form], L = LINKS[t.form];
+  const cap = t.cap && t.board.includes(t.cap) ? C[t.cap] : null;
+  const sum = Array(7).fill(0), cnt = Array(7).fill(0), links = [];
+  L.forEach(([i,j]) => {
+    const a = t.board[i], b = t.board[j];
+    if (!a||!b) { links.push({i,j,info:null}); return; }
+    const info = linkInfo(C[a],C[b]);
+    links.push({i,j,info}); sum[i]+=info.v; sum[j]+=info.v; cnt[i]++; cnt[j]++;
+  });
+  const slots = F.slots.map(([row,x],i) => {
+    const base = {i,row,x,lane:laneOf(x),card:null};
+    const id = t.board[i]; if (!id) return base;
+    const c = C[id], avg = cnt[i] ? sum[i]/cnt[i] : 0;
+    let st = avg>=1.75 ? 3 : avg>=1.1 ? 2 : avg>=0.5 ? 1 : 0;
+    const oop = c.pos!==row;
+    if (oop) st = Math.max(0, st-1);
+    let aura = false;
+    if (cap && c.fac===cap.fac && st<3) { st++; aura = true; }
+    const pen = oop ? 2 : 0;
+    return {...base, card:c, stars:st, oop, aura, atq:Math.max(0,c.atq+st-pen), def:Math.max(0,c.def+st-pen)};
+  });
+  return {slots, links, chem:slots.reduce((s,x)=>s+(x.stars||0),0)};
+}
+function lanes(T){
+  const atk=[0,0,0], def=[BASE,BASE,BASE];
+  T.slots.forEach(s => {
+    if (!s.card) return;
+    if (s.row==='ATA') atk[s.lane] += s.atq;
+    else if (s.row==='TAT') { atk[s.lane] += Math.floor(s.atq/2); def[s.lane] += Math.floor(s.def/2); }
+    else def[s.lane] += s.def;
+  });
+  return {atk, def};
+}
+function teamScore(t){
+  let s = 0;
+  calcTeam(t).slots.forEach(x => {
+    if (!x.card) return;
+    s += x.row==='ATA' ? x.atq*1.5 + x.def*.2 : x.row==='DEF' ? x.def*1.5 + x.atq*.2 : (x.atq+x.def)*.6;
+  });
+  return s;
+}
+function autoEscalar(t){
+  let best = null;
+  for (const f of Object.keys(FORMS)) {
+    for (let r=0;r<10;r++) {
+      const pool = shuffle(t.cards.slice()), board = Array(7).fill(null);
+      FORMS[f].slots.forEach(([row],i) => { let k = pool.findIndex(id=>C[id].pos===row); if (k<0) k=0; board[i] = pool.splice(k,1)[0] || null; });
+      const tt = {form:f, cap:t.cap, board};
+      let sc = teamScore(tt), imp = true, guard = 0;
+      while (imp && guard++<40) {
+        imp = false;
+        for (let i=0;i<7;i++) {
+          for (let j=i+1;j<7;j++) {
+            [board[i],board[j]] = [board[j],board[i]];
+            const s = teamScore(tt);
+            if (s>sc+1e-9) { sc=s; imp=true; } else [board[i],board[j]] = [board[j],board[i]];
+          }
+          for (let k=0;k<pool.length;k++) {
+            [board[i],pool[k]] = [pool[k],board[i]];
+            const s = teamScore(tt);
+            if (s>sc+1e-9) { sc=s; imp=true; } else [board[i],pool[k]] = [pool[k],board[i]];
+          }
+        }
+      }
+      if (!best || sc>best.sc) best = {sc, form:f, board:board.slice()};
+    }
+  }
+  t.form = best.form; t.board = best.board;
+}
+
+/* ---------- Util ---------- */
+const d6 = () => 1 + Math.floor(Math.random()*6);
+function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const stars = n => '★'.repeat(n) + '☆'.repeat(3-n);
+function initials(nome){
+  const w = nome.split(/[\s-]+/).filter(x => !['de','do','da','o','a'].includes(x.toLowerCase()));
+  return (w[0][0] + (w[1] ? w[1][0] : (w[0][1]||''))).toUpperCase();
+}
+function weightedPick(scores){
+  const o = [0,1,2].sort((a,b)=>scores[b]-scores[a]), r = Math.random();
+  return r<.55 ? o[0] : r<.85 ? o[1] : o[2];
+}
+const newTeam = () => ({cards:[], cap:null, form:'2-3-2', board:Array(7).fill(null)});
+
+/* ---------- Estado ---------- */
+let S, timer = null;
+function newState(){ return {fase:'intro', draft:null, me:newTeam(), cpu:newTeam(), sel:null, focus:null, match:null}; }
+const DEMO = {form:'2-3-2', cap:'aurora', board:['faisca','eclipse','prisma','aurora','oraculo','ambar','pulsar'], cards:[]};
+
+/* ---------- Draft ---------- */
+function startDraft(){
+  const caps = shuffle(Object.values(C).filter(c=>c.cap).map(c=>c.id)).slice(0,4);
+  const pool = shuffle(Object.values(C).filter(c=>!c.cap).map(c=>c.id));
+  S = newState();
+  S.fase = 'draft';
+  S.draft = {round:0, picks:0, offer:caps, pool, turn:'me', lastCpu:null};
+}
+function draftValue(team, opp, id){
+  const c = C[id]; let v = c.ovr;
+  team.cards.forEach(o => { const li = linkInfo(c,C[o]); v += li.t==='nem' ? 6 : li.v*2; });
+  const need = {ATA:2, TAT:3, DEF:2};
+  const have = team.cards.filter(o=>C[o].pos===c.pos).length;
+  if (have >= need[c.pos]+1) v -= 10;
+  let hv = 0;
+  opp.cards.forEach(o => { const li = linkInfo(c,C[o]); hv += li.t==='nem' ? 6 : Math.max(0,li.v)*2; });
+  return v + hv*.3 + Math.random()*4;
+}
+function bestPick(who){
+  const other = who==='me' ? 'cpu' : 'me';
+  return S.draft.offer.slice().sort((a,b)=>draftValue(S[who],S[other],b)-draftValue(S[who],S[other],a))[0];
+}
+function doPick(who, id){
+  const d = S.draft, t = S[who];
+  t.cards.push(id);
+  if (d.round===0) t.cap = id;
+  d.offer = d.offer.filter(x=>x!==id);
+  if (who==='cpu') d.lastCpu = id;
+  if (++d.picks >= 2) {
+    d.round++; d.picks = 0;
+    if (d.round >= 9) { finishDraft(); return; }
+    d.offer = d.pool.splice(0,4);
+    d.turn = d.round%2===0 ? 'me' : 'cpu';
+  } else d.turn = who==='me' ? 'cpu' : 'me';
+}
+function finishDraft(){
+  autoEscalar(S.cpu);
+  S.fase = 'escalar'; S.sel = null; S.focus = S.me.cap;
+}
+function schedule(){
+  clearTimeout(timer);
+  if (S.fase==='draft' && S.draft.turn==='cpu') timer = setTimeout(() => {
+    if (S.fase!=='draft' || S.draft.turn!=='cpu') return;
+    doPick('cpu', bestPick('cpu')); render(); schedule();
+  }, 750);
+}
+function quickDraft(){
+  startDraft();
+  while (S.fase==='draft') doPick(S.draft.turn, bestPick(S.draft.turn));
+  autoEscalar(S.me);
+}
+
+/* ---------- Partida ---------- */
+function startMatch(){
+  S.fase = 'partida'; S.sel = null;
+  S.match = {lance:1, placar:[0,0], log:[], atk:null, defe:null, subs:2, res:null, fim:false, pen:null};
+}
+function shot(atk, def, foco){
+  const da = [d6(),d6()], dd = [d6()];
+  const A = atk+da[0]+da[1], D = def+(foco?FOCO:0)+dd[0];
+  return {atk, def, foco, da, dd, A, D, gol:A>D};
+}
+function scorer(T, lane){
+  const inLane = T.slots.filter(s=>s.card && s.lane===lane && s.row!=='DEF');
+  const ata = inLane.filter(s=>s.row==='ATA'), pool = ata.length ? ata : inLane;
+  return pool.length ? pool[Math.floor(Math.random()*pool.length)].card.nome : null;
+}
+function jogar(){
+  const m = S.match;
+  if (m.atk==null || m.defe==null || m.fim) return;
+  const TM = calcTeam(S.me), TC = calcTeam(S.cpu), LM = lanes(TM), LC = lanes(TC);
+  const ca = weightedPick(LC.atk.map((a,l)=>a+7-(LM.def[l]+3.5)));
+  const cd = weightedPick(LM.atk.map((a,l)=>a-LC.def[l]));
+  const mine = shot(LM.atk[m.atk], LC.def[m.atk], cd===m.atk);
+  mine.lane = m.atk; mine.who = scorer(TM, m.atk);
+  const theirs = shot(LC.atk[ca], LM.def[ca], m.defe===ca);
+  theirs.lane = ca; theirs.who = scorer(TC, ca);
+  if (mine.gol) m.placar[0]++;
+  if (theirs.gol) m.placar[1]++;
+  m.res = {n:m.lance, mine, theirs};
+  m.log.unshift({c:'cpu', t:`Lance ${m.lance}: rival atacou pela ${LANES[ca].toLowerCase()} ${theirs.gol ? `e marcou (${theirs.who||'chute de longe'}).` : 'e sua defesa segurou.'}`});
+  m.log.unshift({c:'me',  t:`Lance ${m.lance}: você atacou pela ${LANES[m.atk].toLowerCase()} ${mine.gol ? `e marcou (${mine.who||'chute de longe'}).` : 'e parou na defesa.'}`});
+  m.atk = null; m.defe = null;
+  if (m.lance >= TOTAL_LANCES) {
+    m.fim = true;
+    if (m.placar[0]===m.placar[1]) m.pen = penaltis(TM.chem, TC.chem);
+  } else m.lance++;
+}
+function penaltis(chemMe, chemCpu){
+  // Time com mais química converte com 5 em 6; sem bônus, 1 em 2.
+  const bm = chemMe>=14 ? 1 : 0, bc = chemCpu>=14 ? 1 : 0;
+  let a = 0, b = 0, r = 0;
+  for (;;) {
+    r++;
+    if (d6()+bm >= 4) a++;
+    if (d6()+bc >= 4) b++;
+    if (r>=5 && a!==b) break;
+    if (r>=20) { Math.random()<.5 ? a++ : b++; break; }
+    if (r<5 && (a > b+(5-r) || b > a+(5-r))) break;
+  }
+  return [a,b];
+}
+
+/* ---------- Componentes ---------- */
+function miniCard(c, s, opts={}){
+  const isCap = opts.cap===c.id;
+  return `<div class="mc al-${c.al}${opts.sel?' sel':''}" style="--oc:${ORI[c.ori].c}" title="${c.nome} · ${AL[c.al]} · ${FAC[c.fac]} · ${ORI[c.ori].n} · ${CID[c.cid]}">
+    ${isCap?'<span class="badge cap" aria-label="Capitão">C</span>':''}
+    ${s&&s.oop?'<span class="badge oop" aria-label="Fora de posição">!</span>':''}
+    <div class="mc-top"><b>${c.ovr}</b><span>${c.pos}</span><i>${ORI[c.ori].g}</i></div>
+    <div class="mc-name">${c.nome}</div>
+    ${s?`<div class="mc-st" aria-label="${s.stars} de 3 de química">${stars(s.stars)}</div>`:''}
+  </div>`;
+}
+function bigCard(c, extra=''){
+  const nem = c.nem ? `<div class="nemline">Nêmesis: ${C[c.nem].nome}</div>` : '';
+  return `<div class="bc al-${c.al}" style="--oc:${ORI[c.ori].c}">
+    <div class="bc-head">
+      <div><div class="bc-ovr">${c.ovr}</div><div class="bc-pos">${POSN[c.pos]}</div></div>
+      <div class="bc-em" aria-hidden="true">${initials(c.nome)}</div>
+    </div>
+    <div><div class="bc-al">${AL[c.al]}${c.cap?' · Capitão':''}</div><div class="bc-name">${c.nome}</div></div>
+    <div class="stat">ATQ<span class="bar"><i style="width:${c.atq*10}%"></i></span><em>${c.atq}</em></div>
+    <div class="stat">DEF<span class="bar"><i style="width:${c.def*10}%"></i></span><em>${c.def}</em></div>
+    <div class="chips"><span class="chip">${FAC[c.fac]}</span><span class="chip o">${ORI[c.ori].g} ${ORI[c.ori].n}</span><span class="chip">${CID[c.cid]}</span></div>
+    ${nem}${extra}
+  </div>`;
+}
+function hintFor(id, isCap){
+  const c = C[id]; let g=0, y=0, cf=0, nem=null;
+  S.me.cards.forEach(o => { const li = linkInfo(c,C[o]); if (li.t==='nem') nem = C[o].nome; else if (li.t==='grn') g++; else if (li.t==='yel') y++; else if (li.t==='conf') cf++; });
+  const lines = [];
+  if (isCap) lines.push(`Aura: +1 de química para cartas da ${FAC[c.fac]}.`);
+  if (S.me.cards.length) {
+    lines.push(`Com seu time: <span class="g">${g} forte${g===1?'':'s'}</span> · ${y} fraca${y===1?'':'s'}${cf?` · <span class="r">${cf} conflito${cf===1?'':'s'}</span>`:''}`);
+  }
+  if (nem) lines.push(`<span class="n">Rivalidade com ${nem}, que já está no seu time</span>`);
+  if (c.nem && S.cpu.cards.includes(c.nem)) lines.push(`<span class="n">Nêmesis de ${C[c.nem].nome}, do rival</span>`);
+  return lines.length ? `<div class="hint">${lines.map(l=>`<span>${l}</span>`).join('')}</div>` : '';
+}
+function posCount(t){
+  const n = {ATA:0,TAT:0,DEF:0}; t.cards.forEach(id=>n[C[id].pos]++);
+  return `ATA ${n.ATA} · TAT ${n.TAT} · DEF ${n.DEF}`;
+}
+function boardHTML(t, T, o={}){
+  const top = row => o.flip ? 100-ROWT[row] : ROWT[row];
+  const F = FORMS[t.form].slots;
+  const bands = [[0,40.25],[40.25,59.75],[59.75,100]].map(([a,b],k) =>
+    `<div class="lanebg ${o.hiLane===k?o.hiCls:''}" style="left:${a}%;width:${b-a}%"></div>`).join('');
+  const seps = `<div class="lanesep" style="left:40.25%"></div><div class="lanesep" style="left:59.75%"></div>`;
+  const lbls = o.lanes ? LANES.map((n,k)=>`<span class="lanelbl" style="left:${[20,50,80][k]}%">${n}</span>`).join('') : '';
+  const lines = T.links.map(({i,j,info}) => {
+    const [ri,xi] = F[i], [rj,xj] = F[j];
+    return `<line class="${info?'lk-'+info.t:'lk-off'}" x1="${slotLeft(xi)}" y1="${top(ri)}" x2="${slotLeft(xj)}" y2="${top(rj)}"/>`;
+  }).join('');
+  const slots = T.slots.map(s => {
+    const style = `left:${slotLeft(s.x)}%;top:${top(s.row)}%`;
+    const sel = S.sel && S.sel.from==='slot' && S.sel.i===s.i && o.interactive;
+    const inner = s.card ? miniCard(s.card, s, {cap:t.cap, sel})
+      : `<div class="empty${o.interactive && S.sel ? ' target':''}">${s.row}</div>`;
+    return o.interactive
+      ? `<button class="slot" style="${style}" data-act="slot" data-i="${s.i}" aria-label="${s.card?s.card.nome:'Vaga de '+POSN[s.row]}">${inner}</button>`
+      : `<div class="slot static" style="${style}">${inner}</div>`;
+  }).join('');
+  return `<div class="board${o.flip?' flip':''}">${bands}${seps}${lbls}
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>${slots}</div>`;
+}
+function legend(){
+  return `<div class="legend">
+    <span><i class="k-grn"></i>Forte (2+ em comum)</span><span><i class="k-yel"></i>Fraca (1)</span>
+    <span><i class="k-red"></i>Nenhuma</span><span><i class="k-conf"></i>Herói × vilão</span><span><i class="k-nem"></i>Rivalidade (nêmesis)</span></div>`;
+}
+function header(){
+  const order = ['draft','escalar','partida'], idx = order.indexOf(S.fase);
+  const names = {draft:'Draft', escalar:'Escalação', partida:'Partida'};
+  return `<header class="top"><div class="logo">HERÓIS <span>FUT</span></div>
+    <ol class="steps">${order.map((f,i)=>`<li class="${i===idx?'on':i<idx?'done':''}">${names[f]}</li>`).join('')}</ol></header>`;
+}
+
+/* ---------- Telas ---------- */
+function viewIntro(){
+  const T = calcTeam(DEMO);
+  return `<section class="intro">
+    <div>
+      <h1>Heróis <span>Fut</span></h1>
+      <p class="lead">Monte um time de heróis, vilões e anti-heróis num draft contra o rival. Cartas vizinhas que combinam ganham química, como no FUT. Depois, cinco lances decidem a partida.</p>
+      <ol class="rules">
+        <li><div><b>Draft</b><br>Escolha um capitão e depois 8 cartas, alternando com o rival. Cada rodada mostra 4 cartas e cada um leva 1.</div></li>
+        <li><div><b>Química</b><br>Cartas ligadas que dividem facção, origem ou cidade se fortalecem. Herói ao lado de vilão gera conflito, exceto nêmesis: rivais lado a lado dão química máxima.</div></li>
+        <li><div><b>Partida</b><br>Em cada lance você escolhe por qual faixa atacar e qual reforçar na defesa. O ataque rola 2 dados, a defesa rola 1.</div></li>
+      </ol>
+      <div class="row"><button class="btn" data-act="start">Começar draft</button><button class="btn ghost" data-act="quick">Partida rápida</button></div>
+    </div>
+    <div>
+      <div class="pitch">${boardHTML(DEMO, T, {lanes:true})}</div>
+      <p class="caption">Exemplo: Rei Eclipse ao lado da Capitã Aurora (rivalidade), mas em conflito com Faísca e Oráculo. Química do time: ${T.chem}/21.</p>
+      <div style="margin-top:10px">${legend()}</div>
+    </div>
+  </section>`;
+}
+function viewDraft(){
+  const d = S.draft, isCap = d.round===0, myTurn = d.turn==='me';
+  const strip = (t, n=9) => `<div class="strip">${t.cards.map(id=>miniCard(C[id],null,{cap:t.cap})).join('')}${'<div class="ph"></div>'.repeat(Math.max(0,n-t.cards.length))}</div>`;
+  return `<div class="draftbar">
+      <div><div class="lbl">Rodada ${d.round+1} de 9</div><h2 class="h2">${isCap?'Escolha seu capitão':'Escolha uma carta'}</h2>
+      ${d.lastCpu?`<p class="muted" style="margin-top:4px">O rival levou <b>${C[d.lastCpu].nome}</b>.</p>`:''}</div>
+      <span class="turn ${myTurn?'':'cpu'}">${myTurn?'Sua vez':'Rival escolhendo…'}</span>
+    </div>
+    <div class="offer">${d.offer.map(id=>`<button class="pickbtn" data-act="pick" data-id="${id}" ${myTurn?'':'disabled'}>${bigCard(C[id], hintFor(id,isCap))}</button>`).join('')}</div>
+    <div class="teams">
+      <div class="panel"><div class="row" style="justify-content:space-between"><span class="lbl">Seu time · ${S.me.cards.length}/9</span><span class="poscount">${posCount(S.me)}</span></div>${strip(S.me)}</div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><span class="lbl">Time rival · ${S.cpu.cards.length}/9</span><span class="poscount">${posCount(S.cpu)}</span></div>${strip(S.cpu)}</div>
+    </div>`;
+}
+function focusPanel(T){
+  const id = S.focus; if (!id) return `<div class="panel"><span class="lbl">Carta</span><p class="muted">Toque numa carta para ver detalhes e as ligações dela.</p></div>`;
+  const c = C[id], s = T.slots.find(x=>x.card&&x.card.id===id);
+  let extra = '';
+  if (s) {
+    const ls = T.links.filter(l=>l.info && (l.i===s.i||l.j===s.i)).map(l => {
+      const other = C[S.me.board[l.i===s.i?l.j:l.i]];
+      return `<li><i class="k-${l.info.t}"></i>${other.nome}: ${l.info.why.length?l.info.why.join(', '):'nada em comum'}</li>`;
+    }).join('');
+    const notes = [];
+    if (s.oop) notes.push(`<span class="r">Fora de posição: −1 de química e −2 em ATQ/DEF.</span>`);
+    if (s.aura) notes.push(`<span class="g">+1 de química pela aura do capitão.</span>`);
+    extra = `<div class="hint"><span>Química ${stars(s.stars)} · em campo: ATQ ${s.atq} · DEF ${s.def}</span>${notes.map(n=>`<span>${n}</span>`).join('')}
+      ${ls?`<ul class="links" style="margin-top:4px">${ls}</ul>`:''}</div>`;
+  } else extra = `<div class="hint"><span>No banco. Selecione e toque numa vaga para escalar.</span></div>`;
+  return bigCard(c, extra);
+}
+function viewEscalar(){
+  const T = calcTeam(S.me), TC = calcTeam(S.cpu);
+  const bench = S.me.cards.filter(id=>!S.me.board.includes(id));
+  const filled = S.me.board.filter(Boolean).length;
+  const selSlot = S.sel && S.sel.from==='slot';
+  return `<div class="layout">
+    <section>
+      <div class="pitch">${boardHTML(S.me, T, {interactive:true, lanes:true})}</div>
+      <div class="benchhead"><span class="lbl">Banco · ${bench.length}</span><span class="muted" style="font-size:13px">Selecione uma carta e toque numa vaga</span></div>
+      <div class="bench strip">${bench.map(id=>`<button data-act="bench" data-id="${id}" aria-label="${C[id].nome}">${miniCard(C[id],null,{cap:S.me.cap, sel:S.sel&&S.sel.from==='bench'&&S.sel.id===id})}</button>`).join('') || '<span class="muted">Todos em campo.</span>'}</div>
+    </section>
+    <aside class="side">
+      <div class="panel">
+        <span class="lbl">Formação</span>
+        <div class="seg">${Object.keys(FORMS).map(f=>`<button data-act="form" data-f="${f}" class="${S.me.form===f?'on':''}">${f}<small>${FORMS[f].nome}</small></button>`).join('')}</div>
+        <div class="meter"><b>${T.chem}</b><span class="muted">/ 21 de química</span></div>
+        <div class="meterbar"><i style="width:${T.chem/21*100}%"></i></div>
+        ${legend()}
+      </div>
+      ${focusPanel(T)}
+      <div class="panel">
+        <div class="row">
+          <button class="btn ghost" data-act="auto">Auto-escalar</button>
+          ${selSlot?'<button class="btn ghost" data-act="remover">Mandar ao banco</button>':''}
+          <button class="btn" data-act="jogo" ${filled<7?'disabled':''}>Ir para o jogo</button>
+        </div>
+        <p class="muted" style="font-size:13px">${filled<7?`Faltam ${7-filled} vaga${7-filled===1?'':'s'}.`:'Time completo.'} Rival: ${S.cpu.form} ${FORMS[S.cpu.form].nome}, química ${TC.chem}/21.</p>
+      </div>
+    </aside>
+  </div>`;
+}
+function dice(arr){ return arr.map(n=>`<span class="die">${n}</span>`).join(''); }
+function shotHTML(s, mine){
+  const cls = s.gol ? (mine?'gol':'sofreu') : '';
+  const big = mine ? (s.gol?`Gol! ${s.who||'Chute de longe'}`:'Defendido') : (s.gol?`Gol do rival: ${s.who||'chute de longe'}`:'Sua defesa segurou');
+  return `<div class="shot ${cls}">
+    <div class="head"><span>${mine?'Seu ataque':'Ataque rival'}</span><span>${LANES[s.lane]}</span></div>
+    <div class="big pop">${big}</div>
+    <div class="calc">${s.atk} + ${dice(s.da)} = <b>${s.A}</b> &nbsp;vs&nbsp; ${s.def}${s.foco?` + ${FOCO} reforço`:''} + ${dice(s.dd)} = <b>${s.D}</b></div>
+  </div>`;
+}
+function viewPartida(){
+  const m = S.match, TM = calcTeam(S.me), TC = calcTeam(S.cpu), LM = lanes(TM), LC = lanes(TC);
+  const bench = S.me.cards.filter(id=>!S.me.board.includes(id));
+  const lancesBar = Array.from({length:TOTAL_LANCES},(_,i)=>{ const n=i+1; return `<i class="${n<m.lance||m.fim?'done':n===m.lance?'now':''}"></i>`; }).join('');
+  let controls;
+  if (!m.fim) {
+    controls = `<div class="panel">
+      <div class="row" style="justify-content:space-between"><span class="lbl">Lance ${m.lance} de ${TOTAL_LANCES}</span></div>
+      <span class="lbl">Atacar pela</span>
+      <div class="seg">${LANES.map((n,k)=>`<button class="lanebtn ${m.atk===k?'on':''}" data-act="atk" data-k="${k}">${n}<span class="v"><br>ataque <b>${LM.atk[k]}</b> × defesa ${LC.def[k]}</span></button>`).join('')}</div>
+      <span class="lbl">Reforçar a defesa na</span>
+      <div class="seg">${LANES.map((n,k)=>`<button class="lanebtn ${m.defe===k?'on':''}" data-act="defe" data-k="${k}">${n}<span class="v"><br>ataque deles <b>${LC.atk[k]}</b> × ${LM.def[k]}</span></button>`).join('')}</div>
+      <p class="muted" style="font-size:13px">O ataque soma 2 dados; a defesa soma 1 dado, mais ${FOCO} se for a faixa reforçada. Gol quando o ataque passa a defesa.</p>
+      <button class="btn" data-act="jogar" ${m.atk==null||m.defe==null?'disabled':''}>Jogar lance</button>
+    </div>`;
+  } else {
+    const [a,b] = m.placar, pen = m.pen;
+    const win = a>b || (pen && pen[0]>pen[1]);
+    const draw = false;
+    controls = `<div class="panel">
+      <span class="lbl">Fim de jogo</span>
+      <div class="final pop ${win?'win':draw?'draw':'lose'}">${win?'Vitória!':'Derrota'}</div>
+      <p>${pen?`Empate em ${a} × ${b}, decidido nos pênaltis: ${pen[0]} × ${pen[1]}.`:`Placar final: ${a} × ${b}.`}</p>
+      <div class="row"><button class="btn" data-act="revanche">Revanche</button><button class="btn ghost" data-act="novo">Novo draft</button></div>
+    </div>`;
+  }
+  const subs = !m.fim ? `<div class="benchhead"><span class="lbl">Reservas · ${m.subs} substituiç${m.subs===1?'ão':'ões'} restante${m.subs===1?'':'s'}</span></div>
+    <div class="bench strip">${bench.map(id=>`<button data-act="bench" data-id="${id}" ${m.subs?'':'disabled'} aria-label="${C[id].nome}">${miniCard(C[id],null,{sel:S.sel&&S.sel.id===id})}</button>`).join('')}</div>` : '';
+  return `<div class="score">
+      <span class="t">Você</span><span class="n">${m.placar[0]}</span><span class="x">×</span><span class="n">${m.placar[1]}</span><span class="t">Rival</span>
+      <div class="lances">${lancesBar}</div>
+    </div>
+    <div class="layout">
+      <section>
+        <div class="pitch">
+          ${boardHTML(S.cpu, TC, {flip:true, lanes:true, hiLane:m.atk, hiCls:'hi-atk'})}
+          <div class="midline"></div>
+          ${boardHTML(S.me, TM, {interactive:!m.fim, lanes:true, hiLane:m.defe, hiCls:'hi-def'})}
+        </div>
+        ${subs}
+      </section>
+      <aside class="side">
+        ${controls}
+        ${m.res?`<div class="panel res"><span class="lbl">Resultado do lance ${m.res.n}</span>${shotHTML(m.res.mine,true)}${shotHTML(m.res.theirs,false)}</div>`:''}
+        ${m.log.length?`<div class="panel"><span class="lbl">Súmula</span><ul class="log">${m.log.map(l=>`<li class="${l.c}">${l.t}</li>`).join('')}</ul></div>`:''}
+        <p class="muted" style="font-size:13px">Química: você ${TM.chem}/21 · rival ${TC.chem}/21</p>
+      </aside>
+    </div>`;
+}
+
+/* ---------- Render e ações ---------- */
+const $app = document.getElementById('app');
+function render(){
+  let body;
+  if (S.fase==='intro') body = viewIntro();
+  else if (S.fase==='draft') body = viewDraft();
+  else if (S.fase==='escalar') body = viewEscalar();
+  else body = viewPartida();
+  $app.innerHTML = `<div class="wrap">${header()}${body}</div>`;
+}
+const ACT = {
+  start(){ startDraft(); },
+  quick(){ quickDraft(); },
+  pick(ds){ if (S.draft.turn==='me') doPick('me', ds.id); },
+  form(ds){ S.me.form = ds.f; },
+  auto(){ autoEscalar(S.me); S.sel = null; },
+  remover(){ if (S.sel && S.sel.from==='slot') { S.me.board[S.sel.i] = null; S.sel = null; } },
+  bench(ds){
+    if (S.fase==='partida' && !S.match.subs) return;
+    S.sel = S.sel && S.sel.from==='bench' && S.sel.id===ds.id ? null : {from:'bench', id:ds.id};
+    S.focus = ds.id;
+  },
+  slot(ds){
+    const i = +ds.i, b = S.me.board;
+    if (S.fase==='partida') {
+      const m = S.match;
+      if (!S.sel || m.fim || !m.subs) return;
+      const out = b[i]; b[i] = S.sel.id; m.subs--;
+      m.log.unshift({c:'sub', t:`Substituição: entra ${C[S.sel.id].nome}${out?`, sai ${C[out].nome}`:''}.`});
+      S.sel = null; return;
+    }
+    if (S.sel) {
+      if (S.sel.from==='bench') { b[i] = S.sel.id; S.focus = S.sel.id; S.sel = null; }
+      else if (S.sel.i===i) S.sel = null;
+      else { const j = S.sel.i; [b[i],b[j]] = [b[j],b[i]]; S.focus = b[i]; S.sel = null; }
+    } else if (b[i]) { S.sel = {from:'slot', i, id:b[i]}; S.focus = b[i]; }
+  },
+  jogo(){ if (S.me.board.filter(Boolean).length===7) startMatch(); },
+  atk(ds){ S.match.atk = +ds.k; },
+  defe(ds){ S.match.defe = +ds.k; },
+  jogar(){ jogar(); },
+  revanche(){ startMatch(); },
+  novo(){ S = newState(); },
+};
+$app.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled || !ACT[el.dataset.act]) return;
+  ACT[el.dataset.act](el.dataset);
+  render(); schedule();
+});
+
+function start(data){
+  S = data && data.S ? data.S : newState();
+  render(); schedule();
+}
+window.claude?.hot?.snapshot?.(() => ({S}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
