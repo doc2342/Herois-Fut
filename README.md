@@ -32,3 +32,15 @@ Anti-heróis nunca geram conflito. A química de cada carta (0 a 3 estrelas) vem
 - **Defesa na faixa** = 3 de base + DEF dos defensores + metade da DEF dos táticos + 1d6, mais +4 se for a faixa reforçada.
 - Sai gol quando o ataque supera a defesa. Empate no fim vai para os pênaltis.
 - Dá para fazer até 2 substituições durante a partida.
+
+---
+
+# Bomba Fut
+
+Um "Bomberman de futebol", em `bomba-fut/index.html`. Abra no navegador para jogar.
+
+- A bola faz o papel da bomba: com ela no pé, o chute manda a bola em linha reta. Ela quebra o primeiro cone que encontrar ou deixa tonto o rival que estiver no caminho.
+- Sem a bola, o mesmo botão dá um carrinho, que rouba a bola ou derruba um cone. Quem rouba fica protegido por um instante.
+- Os cones soltam itens: **Alcance** (a bola vai mais longe), **Velocidade** e **Força** (a bola atravessa cones).
+- Vence quem fizer 3 gols ou estiver na frente quando os 2 minutos acabarem. Empate vai para o gol de ouro.
+- Controles: jogador 1 usa `WASD` e `Espaço`, jogador 2 usa as setas e `Enter`. Contra a CPU (Fácil, Normal ou Difícil) vale qualquer um. No celular aparecem botões na tela.
